@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { Menu, X, Leaf } from "lucide-react";
 
 const navLinks = [
@@ -71,14 +72,15 @@ export default function Navbar() {
         </ul>
 
         {/* Admin link - desktop */}
-        <a
-          href="/AdminDashboard"
+        <Link
+          to="/AdminDashboard"
           className={`hidden md:inline-flex text-xs font-semibold px-4 py-1.5 rounded-full border transition-all ${
             scrolled ? "border-green-700 text-green-700 hover:bg-green-50" : "border-white/40 text-white/80 hover:bg-white/10"
           }`}
+          aria-label="Admin dashboard"
         >
           Admin
-        </a>
+        </Link>
 
         {/* CTA */}
         <button
@@ -115,6 +117,13 @@ export default function Navbar() {
               {link.label}
             </button>
           ))}
+          <Link
+            to="/AdminDashboard"
+            onClick={() => setMenuOpen(false)}
+            className="text-left text-green-900 font-medium text-base py-1 hover:text-green-600 transition-colors focus:outline-none focus-visible:underline"
+          >
+            Admin
+          </Link>
           <button
             onClick={() => handleNav("#contact")}
             className="w-full bg-green-600 text-white font-semibold py-3 rounded-full mt-2 hover:bg-green-700 transition-colors"
