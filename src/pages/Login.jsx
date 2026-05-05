@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, Link } from "react-router-dom";
 import { useAuth } from "@/lib/AuthContext";
-import { Lock, Mail, Eye, EyeOff } from "lucide-react";
+import { Lock, Mail, Eye, EyeOff, ArrowLeft } from "lucide-react";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -127,6 +127,17 @@ export default function Login() {
             <p className="text-sm text-green-800 font-medium mb-2">Demo Credentials:</p>
             <p className="text-xs text-green-700">Email: admin@cfofarms.com</p>
             <p className="text-xs text-green-700">Password: admin123</p>
+          </div>
+
+          {/* Back to Site Link */}
+          <div className="mt-6 text-center">
+            <Link
+              to="/"
+              className="inline-flex items-center gap-2 text-gray-600 hover:text-green-600 text-sm transition-colors"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              Back to CFO Farms
+            </Link>
           </div>
         </div>
       </div>

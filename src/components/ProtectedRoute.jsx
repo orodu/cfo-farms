@@ -1,5 +1,5 @@
 import React from 'react';
-import { Navigate, useLocation } from 'react-router-dom';
+import { Navigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '@/lib/AuthContext';
 
 const ProtectedRoute = ({ children, requiredRole = null }) => {
@@ -29,12 +29,12 @@ const ProtectedRoute = ({ children, requiredRole = null }) => {
             <p className="text-gray-600 mb-6">
               You don't have permission to access this page. Admin role required.
             </p>
-            <a
-              href="/"
+            <Link
+              to="/"
               className="inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-3 rounded-lg transition-colors"
             >
               Go to Home
-            </a>
+            </Link>
           </div>
         </div>
       </div>

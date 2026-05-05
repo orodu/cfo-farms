@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { Plus, Pencil, Trash2, Save, X, BarChart2, ArrowLeft, UserPlus, CheckCircle, LogOut } from "lucide-react";
-import { createPageUrl } from "@/utils";
+import { Link, useNavigate } from "react-router-dom";
 import { getCerealPrices, addCerealPrice, updateCerealPrice, deleteCerealPrice } from "@/lib/cerealPrices";
 import { useAuth } from "@/lib/AuthContext";
-import { useNavigate } from "react-router-dom";
 
 const MARKETS = ["Benue", "Kano", "Lagos", "Port Harcourt"];
 const CEREALS = ["Maize", "Rice", "Sorghum", "Millet", "Wheat"];
@@ -91,12 +90,12 @@ export default function AdminDashboard() {
             <p className="text-gray-600 mb-6">
               You don't have permission to access this page.
             </p>
-            <a
-              href="/"
+            <Link
+              to="/"
               className="inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-3 rounded-lg transition-colors"
             >
               Go to Home
-            </a>
+            </Link>
           </div>
         </div>
       </div>
@@ -131,10 +130,12 @@ export default function AdminDashboard() {
           </div>
           <div className="flex items-center gap-3">
             <span className="text-green-300 text-sm">Welcome, {user?.email}</span>
-            <a href={createPageUrl("Home")}
-              className="flex items-center gap-1.5 text-green-300 hover:text-white text-sm transition-colors">
+            <Link
+              to="/"
+              className="flex items-center gap-1.5 text-green-300 hover:text-white text-sm transition-colors"
+            >
               <ArrowLeft className="w-4 h-4" /> Back to Site
-            </a>
+            </Link>
             <button onClick={() => setShowInvite(true)}
               className="flex items-center gap-2 bg-white/20 hover:bg-white/30 text-white font-semibold px-4 py-2 rounded-lg text-sm transition-colors">
               <UserPlus className="w-4 h-4" /> Invite Admin
