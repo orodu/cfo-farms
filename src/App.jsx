@@ -6,6 +6,7 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
+import ProtectedRoute from '@/components/ProtectedRoute';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -46,7 +47,19 @@ const AuthenticatedApp = () => {
           <MainPage />
         </LayoutWrapper>
       } />
-      {Object.entries(Pages).map(([path, Page]) => (
+      <Route path="/Login" element={
+        <LayoutWrapper currentPageName="Login">
+          <Pages.Login />
+        </LayoutWrapper>
+      } />
+      <Route path="/AdminDashboard" element={
+        <ProtectedRoute requiredRole="admin">
+          <LayoutWrapper currentPageName="AdminDashboard">
+            <Pages.AdminDashboard />
+          </LayoutWrapper>
+        </ProtectedRoute>
+      } />
+      {Object.entries(Pages).filter(([path]) => !['Home', 'Login', 'AdminDashboard'].includes(path)).map(([path, Page]) => (
         <Route
           key={path}
           path={`/${path}`}

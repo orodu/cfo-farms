@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { Plus, Pencil, Trash2, Save, X, BarChart2, ArrowLeft, UserPlus, CheckCircle } from "lucide-react";
+import { Plus, Pencil, Trash2, Save, X, BarChart2, ArrowLeft, UserPlus, CheckCircle, LogOut } from "lucide-react";
 import { createPageUrl } from "@/utils";
 import { getCerealPrices, addCerealPrice, updateCerealPrice, deleteCerealPrice } from "@/lib/cerealPrices";
+import { useAuth } from "@/lib/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 const MARKETS = ["Benue", "Kano", "Lagos", "Port Harcourt"];
 const CEREALS = ["Maize", "Rice", "Sorghum", "Millet", "Wheat"];
@@ -10,8 +12,9 @@ const TRENDS  = ["up", "down", "stable"];
 const EMPTY_FORM = { cereal: "Maize", market: "Benue", price_per_100kg: "", trend: "stable", notes: "" };
 
 export default function AdminDashboard() {
-  const [user, setUser]             = useState({ role: 'admin' }); // Mock admin user
-  const [authChecked, setAuthChecked] = useState(true);
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+  const [authChecked, setAuthChecked] = useState(false);
   const [prices, setPrices]         = useState([]);
   const [loading, setLoading]       = useState(true);
   const [editing, setEditing]       = useState(null);   // null=closed | {}=new | {id,...}=edit
@@ -25,15 +28,19 @@ export default function AdminDashboard() {
 
   /* ── Auth check ── */
   useEffect(() => {
-    // Simplified: assume admin access
-    setUser({ role: 'admin' });
-    setAuthChecked(true);
-  }, []);
+    if (user?.role === "admin") {
+      setAuthChecked(true);
+      loadPrices();
+    } else {
+      setAuthChecked(true);
+      setLoading(false);
+    }
+  }, [user]);
 
-  useEffect(() => {
-    if (user?.role === "admin") loadPrices();
-    else if (authChecked) setLoading(false);
-  }, [user, authChecked]);
+  const handleLogout = () => {
+    logout();
+    navigate("/Login");
+  };
 
   /* ── Data ── */
   const loadPrices = async () => {
@@ -67,7 +74,34 @@ export default function AdminDashboard() {
   };
 
   /* ── Guards ── */
-  // Simplified: assume admin access
+  if (!authChecked) {
+    return (
+      <div className="min-h-screen bg-[#F5F9F3] flex items-center justify-center">
+        <div className="w-8 h-8 border-4 border-green-200 border-t-green-600 rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  if (!user || user.role !== "admin") {
+    return (
+      <div className="min-h-screen bg-[#F5F9F3] flex items-center justify-center px-4">
+        <div className="max-w-md w-full text-center">
+          <div className="bg-white rounded-2xl shadow-lg p-8">
+            <h1 className="text-2xl font-bold text-red-600 mb-4">Access Denied</h1>
+            <p className="text-gray-600 mb-6">
+              You don't have permission to access this page.
+            </p>
+            <a
+              href="/"
+              className="inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-3 rounded-lg transition-colors"
+            >
+              Go to Home
+            </a>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const handleInvite = async (e) => {
     e.preventDefault();
@@ -96,6 +130,7 @@ export default function AdminDashboard() {
             </div>
           </div>
           <div className="flex items-center gap-3">
+            <span className="text-green-300 text-sm">Welcome, {user?.email}</span>
             <a href={createPageUrl("Home")}
               className="flex items-center gap-1.5 text-green-300 hover:text-white text-sm transition-colors">
               <ArrowLeft className="w-4 h-4" /> Back to Site
@@ -107,6 +142,10 @@ export default function AdminDashboard() {
             <button onClick={openNew}
               className="flex items-center gap-2 bg-green-500 hover:bg-green-400 text-white font-semibold px-4 py-2 rounded-lg text-sm transition-colors">
               <Plus className="w-4 h-4" /> Add Entry
+            </button>
+            <button onClick={handleLogout}
+              className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white font-semibold px-4 py-2 rounded-lg text-sm transition-colors">
+              <LogOut className="w-4 h-4" /> Logout
             </button>
           </div>
         </div>

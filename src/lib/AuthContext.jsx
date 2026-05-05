@@ -3,17 +3,18 @@ import { appParams } from '@/lib/app-params';
 
 const AuthContext = createContext(null);
 
+const AUTH_STORAGE_KEY = 'cfo_farms_auth';
+
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isLoadingAuth, setIsLoadingAuth] = useState(false);
+  const [isLoadingAuth, setIsLoadingAuth] = useState(true);
   const [isLoadingPublicSettings, setIsLoadingPublicSettings] = useState(false);
   const [authError, setAuthError] = useState(null);
   const [appPublicSettings, setAppPublicSettings] = useState({ id: 'cfo-farms' });
 
   useEffect(() => {
-    setIsAuthenticated(false);
-    setIsLoadingAuth(false);
+    checkUserAuth();
     setIsLoadingPublicSettings(false);
   }, []);
 
@@ -22,22 +23,48 @@ export const AuthProvider = ({ children }) => {
   };
 
   const checkUserAuth = async () => {
-    setUser(null);
-    setIsAuthenticated(false);
+    setIsLoadingAuth(true);
+    try {
+      const storedAuth = localStorage.getItem(AUTH_STORAGE_KEY);
+      if (storedAuth) {
+        const authData = JSON.parse(storedAuth);
+        // Check if session is still valid (24 hours)
+        const sessionAge = Date.now() - authData.timestamp;
+        if (sessionAge < 24 * 60 * 60 * 1000) { // 24 hours
+          setUser(authData.user);
+          setIsAuthenticated(true);
+        } else {
+          localStorage.removeItem(AUTH_STORAGE_KEY);
+        }
+      }
+    } catch (error) {
+      console.error('Auth check failed:', error);
+      localStorage.removeItem(AUTH_STORAGE_KEY);
+    } finally {
+      setIsLoadingAuth(false);
+    }
   };
 
-  const login = async () => {
-    setUser({ role: 'user' });
+  const login = async (userData) => {
+    const authData = {
+      user: userData,
+      timestamp: Date.now()
+    };
+    localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(authData));
+    setUser(userData);
     setIsAuthenticated(true);
+    setAuthError(null);
   };
 
   const logout = (shouldRedirect = true) => {
+    localStorage.removeItem(AUTH_STORAGE_KEY);
     setUser(null);
     setIsAuthenticated(false);
+    setAuthError(null);
   };
 
   const navigateToLogin = () => {
-    // Mock navigation placeholder
+    // This will be handled by the ProtectedRoute component
   };
 
   return (
