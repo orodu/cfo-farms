@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Mail, Phone, MapPin, Send, CheckCircle } from "lucide-react";
+import emailjs from '@emailjs/browser';
 
 const contactInfo = [
   { icon: Mail, label: "Email Us", value: "hello@cfofarm.com.ng", href: "mailto:hello@cfofarm.com.ng" },
@@ -11,18 +12,56 @@ export default function ContactSection() {
   const [form, setForm] = useState({ name: "", email: "", subject: "", message: "" });
   const [submitted, setSubmitted] = useState(false);
   const [sending, setSending] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+
+  // Initialize EmailJS
+  useEffect(() => {
+    emailjs.init({
+      publicKey: 'YOUR_EMAILJS_PUBLIC_KEY', // Replace with your EmailJS public key
+    });
+  }, []);
 
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSending(true);
-    // Mock email sending
-    console.log('Contact form submitted:', form);
-    alert('Thank you for your message! We will get back to you soon.');
-    setSending(false);
-    setSubmitted(true);
-    setForm({ name: "", email: "", subject: "", message: "" });
+
+    try {
+      // EmailJS configuration - Update these values in EmailJS dashboard
+      // Service ID: Found in Email Services section
+      // Template ID: Found in Email Templates section
+      // Public Key: Found in Account → General
+      const templateParams = {
+        from_name: form.name,
+        from_email: form.email,
+        subject: form.subject || 'Contact Form Submission',
+        message: form.message,
+        to_email: 'cfoenterprise2021@gmail.com',
+      };
+
+      await emailjs.send(
+        'YOUR_EMAILJS_SERVICE_ID', // Replace with your EmailJS service ID
+        'YOUR_EMAILJS_TEMPLATE_ID', // Replace with your EmailJS template ID
+        templateParams
+      );
+
+      // Show success message
+      setShowSuccess(true);
+      setForm({ name: "", email: "", subject: "", message: "" });
+
+      // Auto-return to form after 3 seconds
+      setTimeout(() => {
+        setShowSuccess(false);
+        setSubmitted(false);
+      }, 3000);
+
+    } catch (error) {
+      console.error('Email sending failed:', error);
+      alert('Sorry, there was an error sending your message. Please try again or contact us directly.');
+    } finally {
+      setSending(false);
+    }
   };
 
   return (
@@ -81,7 +120,7 @@ export default function ContactSection() {
 
           {/* Form */}
           <div className="lg:col-span-3 bg-white rounded-3xl p-8 md:p-10 border border-green-100 shadow-sm">
-            {submitted ? (
+            {showSuccess ? (
               <div className="flex flex-col items-center justify-center h-full text-center py-16 gap-4">
                 <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center" aria-hidden="true">
                   <CheckCircle className="w-9 h-9 text-green-600" />
@@ -90,12 +129,9 @@ export default function ContactSection() {
                 <p className="text-gray-500 max-w-sm">
                   Thank you for reaching out. Our team will get back to you within 24 hours.
                 </p>
-                <button
-                  onClick={() => setSubmitted(false)}
-                  className="mt-4 text-green-600 font-semibold hover:underline focus:outline-none focus-visible:underline"
-                >
-                  Send another message
-                </button>
+                <p className="text-sm text-gray-400 mt-2">
+                  Returning to form...
+                </p>
               </div>
             ) : (
               <form onSubmit={handleSubmit} noValidate aria-label="Contact form">
